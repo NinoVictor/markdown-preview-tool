@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"time"
 
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday/v2"
@@ -70,6 +71,9 @@ func run(filename string, out io.Writer, skipPreview bool) error {
 	if skipPreview {
 		return nil
 	}
+
+	defer os.Remove(outName)
+
 	return preview(outName)
 }
 
@@ -116,5 +120,10 @@ func preview(fname string) error {
 	}
 
 	//Open the file using default program
-	return exec.Command(cPath, cParams...).Run()
+	err = exec.Command(cPath, cParams...).Run()
+
+	//Give the browser some time to open the file before deleting it
+	time.Sleep(2 * time.Second)
+
+	return err
 }
